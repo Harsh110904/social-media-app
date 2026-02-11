@@ -1,7 +1,8 @@
-//use - routes kon konse hai 
-const express = require("express")
-const userModel = require("../models/user.model")
+﻿const express = require("express")
+const router = express.Router()
+const {registerController, loginController} = require("../controllers/auth.controller")
 
-router.post("/register",)
-router.post("/login",)
+router.post("/register", registerController)
+router.post("/login", loginController)
+
 module.exports = router
