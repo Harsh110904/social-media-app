@@ -1,35 +1,38 @@
 const postModel = require("../models/post.model")
+const generateCaption = require("../service/ai.service")
 
 async function createPostController(req, res) {
+    console.log("req.file:", req.file);
+    console.log("req.files:", req.files);
+    
+    const file = req.file || (req.files && req.files[0]);
+    console.log("File selected:", file);
+    
+    if (!file) {
+        return res.status(400).json({
+            success: false,
+            message: "No image file provided"
+        });
+    }
+    
     try {
-        console.log("Request files:", req.files);
-        console.log("Request body:", req.body);
+        // Convert image buffer to base64
+        const base64Image = file.buffer.toString('base64');
         
-        if (!req.files || req.files.length === 0) {
-            console.log("No files found in request");
-            return res.status(400).json({
-                message: "Image is required"
-            });
-        }
+        // Generate caption using AI
+        const caption = await generateCaption(base64Image);
         
-        // Get the first file (in case multiple were uploaded)
-        const file = req.files[0];
-        console.log("Processing file:", file);
-        
-        // TODO: Upload to cloud storage and generate caption
-        
-        res.status(201).json({
-            message: "Post created successfully",
-            file: {
-                originalname: file.originalname,
-                mimetype: file.mimetype,
-                size: file.size
-            }
+        res.status(200).json({
+            success: true,
+            message: "Caption generated successfully",
+            caption: caption,
+            filename: file.originalname
         });
     } catch (error) {
-        console.error("Error in createPostController:", error);
+        console.error("Error generating caption:", error);
         res.status(500).json({
-            message: "Error creating post",
+            success: false,
+            message: "Failed to generate caption",
             error: error.message
         });
     }
